@@ -13,10 +13,17 @@
 import UIKit
 
 class ViewController: UIViewController {
+    //之前选择的Label
+    var lastLabel : UILabel?
+    //现在选择的Label
+    var sellectLabel : UILabel?
+    // 数独方格数组
+    var sudokuLabels = [UILabel]()
+    // 数字按钮数组
+    var numLabels = [UILabel]()
     
-    var lastLabel : UILabel?          //之前选择的Label
-    var sellectLabel : UILabel?       //现在选择的Label
-    var mySudoku = Sudoku()           //数独类的对象实例
+    //数独类的对象实例
+    var mySudoku = Sudoku()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,58 +33,75 @@ class ViewController: UIViewController {
         
         
         
-        
-        for i in 0 ... 80 {               //建立9*9=81个Label对象，作为数独格
-            let label = UILabel()         //定义一个UILabel对象-label。
+        //建立9*9=81个Label对象，作为数独格
+        for i in 0 ... 80 {
+            sudokuLabels.append(UILabel())
+            //let label = UILabel()         //定义一个UILabel对象-label。
             //设置label的属性
-            label.font = UIFont.systemFont(ofSize: 30)  //字体大小30
-            label.text = ""
-            label.textAlignment = .center
-            label.backgroundColor = UIColor(red: 0,     //青色背景，全透明
+            //字体大小30
+            sudokuLabels[i].font = UIFont.systemFont(ofSize: 30)
+            sudokuLabels[i].text = ""
+            sudokuLabels[i].textAlignment = .center
+            //青色背景，全透明
+            sudokuLabels[i].backgroundColor = UIColor(red: 0,
                                             green: 1,
                                             blue: 1,
                                             alpha: 0)
-            label.frame = CGRect(x: 8 + (i % 9) * 40,    //定位
-                                 y: 73 + (i / 9) * 40,
-                                 width: 40,
-                                 height: 40)
-            label.tag = i + 1      //设置tag为1-81
+            //定位
+            sudokuLabels[i].frame = CGRect(x: 8 + (i % 9) * 40,
+                                           y: 73 + (i / 9) * 40,
+                                           width: 40,
+                                           height: 40)
+            //设置 tag 为 1-81
+            sudokuLabels[i].tag = i + 1
             
-            
-            label.isUserInteractionEnabled = true  //设置为可交互
+            //设置为可交互
+            sudokuLabels[i].isUserInteractionEnabled = true
             //添加点击手势，绑定 tapLabel 函数
-            label.addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(ViewController.tapLabel(sender:))))
-            self.view.addSubview(label)      //添加该label
+            sudokuLabels[i].addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(tapLabel)))
+            //添加该label
+            self.view.addSubview(sudokuLabels[i])
         }
         
         
-        
-        for i in 1 ... 9 {            //建立9个Label对象，作为数字按键
-            let label = UILabel()     //定义一个UILabel对象-label。
-            //设置label的属性
-            label.font = UIFont.systemFont(ofSize: 30) //字体大小30
-            label.frame = CGRect(x: 9 + (i - 1) * 40,  //定位
-                                 y: 73 + 9 * 40 + 10,
-                                 width: 39,
-                                 height: 39)
-            label.tag = i + 100       //设置tag为101-109
+        //建立9个Label对象，作为数字按键
+        for i in 0 ... 8 {
+            // 添加一个数字按钮 label
+            numLabels.append(UILabel())
             
-            label.text = String(i)     //显示1-9
-            label.backgroundColor = UIColor(red: 231/255,    //背景颜色
-                                            green: 155/255,
-                                            blue: 63/255,
-                                            alpha: 1)
-            label.textColor = UIColor(red: 231/255,           //文字颜色
-                                      green: 6/255,
-                                      blue: 16/255,
-                                      alpha: 1)
-            label.textAlignment = .center
-            label.isUserInteractionEnabled = true             //设置为可交互
+            //let label = UILabel()     //定义一个UILabel对象-label。
+            //设置label的属性
+            //字体大小30
+            numLabels[i].font = UIFont.systemFont(ofSize: 30)
+            //定位
+            numLabels[i].frame = CGRect(x: 9 + (i) * 40,
+                                        y: 73 + 9 * 40 + 10,
+                                        width: 39,
+                                        height: 39)
+            //设置tag为101-109
+            numLabels[i].tag = i + 100 + 1
+            
+            //显示1-9
+            numLabels[i].text = String(i + 1)
+            //背景颜色
+            numLabels[i].backgroundColor = UIColor(red: 231/255,
+                                                   green: 155/255,
+                                                   blue: 63/255,
+                                                   alpha: 1)
+            //文字颜色
+            numLabels[i].textColor = UIColor(red: 231/255,           //文字颜色
+                                             green: 6/255,
+                                             blue: 16/255,
+                                             alpha: 1)
+            
+            numLabels[i].textAlignment = .center
+            //设置为可交互
+            numLabels[i].isUserInteractionEnabled = true
             
             //添加点击手势，绑定 tapNumberLabel 函数
-            label.addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(ViewController.tapNumberLabel(sender:))))
-            
-            self.view.addSubview(label)  //添加该label
+            numLabels[i].addGestureRecognizer(UITapGestureRecognizer(target: self, action:#selector(tapNumberLabel)))
+            //添加该label
+            self.view.addSubview(numLabels[i])
         }
         
         //设置左上角为默认选择和之前的选择，并设置青色背景
@@ -87,6 +111,7 @@ class ViewController: UIViewController {
                                                 green: 1,
                                                 blue: 1,
                                                 alpha: 1)
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -140,13 +165,22 @@ class ViewController: UIViewController {
         mySudoku.SudokuBL[x][y] = false
     }
     
-    //“计算”按钮处理函数
+    /// “计算”按钮响应函数
     @IBAction func Calculate(){
-        if mySudoku.FillNumber(x: 0, y: 0,target:self) {  //如果“填数”函数成功
-            DisplaySudoku()
+        // 建立子线程派遣队列
+        let queue = DispatchQueue(label: "suduku.fillnumber")
+        // 在子线程中调用 fillNumber 函数，以便在主线程中更新UI
+        queue.async {
+            // 如果”填数“成功，显示结果，如果失败，打印”无解“
+            if self.mySudoku.FillNumber(x: 0, y: 0,target:self) {
+                // 在主线程中调用 DisplaySudoku 显示结果
+                DispatchQueue.main.async {
+                    self.DisplaySudoku()
+                }
+            }else{
+                print("无解")
+            }
         }
-        
-        
     }
     
     //显示数独函数

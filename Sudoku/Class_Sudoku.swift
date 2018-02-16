@@ -15,8 +15,8 @@ class Sudoku{
     
     //是否题目数字的数据数组，true代表是题目数字
     var SudokuBL = [[Bool]](repeating: [Bool](repeating: false, count: 10), count: 10)
-    
-    var IteratTimes:Int  //迭代计数器
+    //迭代计数器
+    var IteratTimes:Int
     
     //构造函数：迭代计数器归零
     init(){
@@ -34,13 +34,14 @@ class Sudoku{
     }
     
     //填数字函数（核心）
-    func FillNumber( x:Int, y:Int,target:AnyObject) -> Bool {
-        //重新定义变量x,y
+    func FillNumber( x:Int, y:Int,target:ViewController) -> Bool {
+        //重新定义变量x,y（因为x,y将被修改）
         var y = y
         var x = x
-        
-        IteratTimes += 1                     //迭代计数
-        print(IteratTimes)
+
+        //迭代计数
+        IteratTimes += 1
+        //print(IteratTimes)
         
         //移动到非题目数字
         while SudokuBL[x][y] {
@@ -49,7 +50,7 @@ class Sudoku{
         
         //仅迭代过程中，y<0说明无解
         if y < 0 {
-           print("无解")
+           //print("无解")
            return false
         }
         
@@ -58,25 +59,39 @@ class Sudoku{
             return true
         }
         
-        
-        var m = true                   //判断是否重复数字，ture为重复或0（未填数字）
+        // 判断是否重复数字，ture为重复或0（未填数字）
+        // 因为至少运行一次，先设为 true
+        var m = true
         while m {
-            SudokuData[x][y] += 1      //重数或0，数字+1
-            //target.performSelector(onMainThread: #selector(ViewController.DisplaySudoku), with: nil, waitUntilDone: true)
+            //重数或0，数字+1
+            SudokuData[x][y] += 1
+            
             //如果数字大于9，说明1-9均无效，前面有错误，返回上一迭代
             if (SudokuData[x][y] > 9) {
+                // 退出前将当前格数字设为0
                 SudokuData[x][y] = 0
-                if x == 0 && y == 0 {
-                    print("无解")
+                // 在主线程中清除当前格数字
+                DispatchQueue.main.sync{
+                    target.sudokuLabels[x * 9 + y].text = ""
+                    
                 }
+                // 以失败为结果退出当前递归调用
                 return false
             }
+
+            // 在主线程中更新当前格数字
+            DispatchQueue.main.sync{
+                target.sudokuLabels[x * 9 + y].text = String(self.SudokuData[x][y])
+                
+            }
+            //Thread.sleep(forTimeInterval: 0.01)
             
             //临时x1,y1
             var x1 = 0
             var y1 = 0
             
-            m = false               //先假设无重复
+            //先假设无重复
+            m = false
             for  i in 0...8 {
                 //判断x轴是否有重复
                 if (i != x) && (SudokuData[i][y] == SudokuData[x][y]) {
@@ -101,7 +116,7 @@ class Sudoku{
                 }
             }
             
-            //如果无重复，移动到下一个，进行迭代调用
+            //如果无重复，移动到下一格，进行迭代调用
             if !m {
                 MoveXY(x:&x, y:&y, d:1)
                 
